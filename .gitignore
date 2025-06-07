@@ -38,7 +38,6 @@ logs/
 
 # TrustCheck AI specific
 sample_docs/
-output/
 models/*.gguf
 models/*.bin
 .env
