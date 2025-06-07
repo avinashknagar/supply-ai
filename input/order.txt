@@ -1,0 +1,48 @@
+Order 1:
+  Material: Hydrochloric Acid
+  Purity: 36%
+  Quantity: 100 kg/month
+  Technical Requirements: Industrial Grade
+
+Order 2:
+  Material: Sulfuric Acid
+  Purity: 99%
+  Quantity: 150 kg/month
+  Technical Requirements: Pharma Grade, Low Water Content, Extra Pure
+
+Order 3:
+  Material: Acetic Acid
+  Purity: 99%
+  Quantity: 50 kg/month
+  Technical Requirements: Glacial
+
+Order 4:
+  Material: Caustic Soda Flakes
+  Purity: 90%
+  Quantity: 600 kg/month
+  Technical Requirements: Food Grade, Low Iron, Kosher Certified
+
+Order 5:
+  Material: Nitric Acid
+  Purity: 65%
+  Quantity: 80 kg/month
+  Technical Requirements: None
+
+Order 6:
+  Material: Caustic Soda Lye
+  Purity: 45%
+  Quantity: 50 ton/month
+  Technical Requirements: Membrane Grade
+
+Order 7:
+  Material: Sulfuric Acid
+  Purity: 98
+  Quantity: 150
+  Technical Requirements: Pharma Grade
+
+Order 8:
+  Material: Hydrochloric Acid
+  Purity: 30%
+  Quantity: 200 kg/week
+  Technical Requirements: Industrial Grade
+

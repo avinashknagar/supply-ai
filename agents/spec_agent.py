@@ -1,5 +1,6 @@
-from supply_ai.tools.llm_tool import LLMTool
+from tools.llm_tool import LLMTool
 import logging
+from typing import Dict, Any
 
 class SpecAgent:
     def __init__(self):

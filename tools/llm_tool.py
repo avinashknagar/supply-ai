@@ -1,7 +1,8 @@
 from langchain_community.llms import Ollama
 from langchain_core.output_parsers import JsonOutputParser
-from supply_ai.config.config import Config
+from config.config import Config
 import logging
+from typing import Dict, Any
 
 class LLMTool:
     def __init__(self):

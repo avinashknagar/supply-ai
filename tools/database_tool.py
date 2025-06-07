@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List, Dict, Any
-from supply_ai.config.config import Config
+from config.config import Config
 
 class DatabaseTool:
     def __init__(self):

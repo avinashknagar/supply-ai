@@ -31,9 +31,17 @@ A simple AI-powered assistant for processing RFQs (Request for Quotations) and f
    pip install -r requirements.txt
    ```
 
-5. Run the application:
+5. Running the application:
+
+   **Web Interface Mode:**
    ```bash
-   streamlit run main.py
+   streamlit run app.py
+   ```
+
+   **Command Line Mode:**
+   ```bash
+   # Process orders from input/order.txt and save results to output/
+   python app.py
    ```
 
 ## Features
@@ -46,10 +54,17 @@ A simple AI-powered assistant for processing RFQs (Request for Quotations) and f
 
 ## Usage
 
-1. Start the application
+### Web Interface
+1. Start the application using `streamlit run app.py`
 2. In the sidebar, add suppliers by filling in their details
 3. In the main panel, paste an RFQ text
 4. Click "Process RFQ" to analyze the RFQ and find suitable suppliers
+
+### Command Line
+1. Place your order text in `input/order.txt`
+2. Place your inventory data in `input/inventory.json` (optional)
+3. Run `python app.py`
+4. Results will be saved to `output/order_analysis_<timestamp>.txt`
 
 ## Note
 

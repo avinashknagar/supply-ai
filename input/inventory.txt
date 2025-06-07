@@ -1,0 +1,104 @@
+[
+    {
+        "material": "Sulfuric Acid",
+        "purity": "98%",
+        "quantity": "200 kg/month",
+        "technical_requirements": [
+            "Pharma Grade",
+            "Low Water Content"
+        ]
+    },
+    {
+        "material": "Hydrochloric Acid",
+        "purity": "37%",
+        "quantity": "150 kg/month",
+        "technical_requirements": [
+            "Industrial Grade",
+            "Specific Inhibitor Package"
+        ]
+    },
+    {
+        "material": "Hydrochloric Acid",
+        "purity": "35%",
+        "quantity": "50 kg/month",
+        "technical_requirements": [
+            "Industrial Grade"
+        ]
+    },
+    {
+        "material": "Nitric Acid",
+        "purity": "68%",
+        "quantity": "100 kg/month",
+        "technical_requirements": [
+            "Reagent Grade"
+        ]
+    },
+    {
+        "material": "Caustic Soda Flakes",
+        "purity": "99%",
+        "quantity": "500 kg/month",
+        "technical_requirements": [
+            "Food Grade",
+            "Low Iron"
+        ]
+    },
+    {
+        "material": "Caustic Soda Lye",
+        "purity": "48%",
+        "quantity": "1000 ton/year",
+        "technical_requirements": [
+            "Membrane Grade"
+        ]
+    },
+    {
+        "material": "Acetic Acid",
+        "purity": "99.5%",
+        "quantity": "120 kg/month",
+        "technical_requirements": [
+            "Glacial",
+            "Low Aldehyde Content"
+        ]
+    },
+    {
+        "material": "Sodium Hypochlorite",
+        "purity": "12%",
+        "quantity": "300 kg/month",
+        "technical_requirements": [
+            "Disinfectant Grade"
+        ]
+    },
+    {
+        "material": "Potassium Hydroxide",
+        "purity": "90%",
+        "quantity": "250 kg/month",
+        "technical_requirements": [
+            "Battery Grade",
+            "Low Chloride"
+        ]
+    },
+    {
+        "material": "Formic Acid",
+        "purity": "85%",
+        "quantity": "80 kg/month",
+        "technical_requirements": [
+            "Rubber Grade"
+        ]
+    },
+    {
+        "material": "Ammonium Hydroxide",
+        "purity": "25%",
+        "quantity": "100 kg/month",
+        "technical_requirements": [
+            "Lab Grade"
+        ]
+    },
+    {
+        "material": "Phosphoric Acid",
+        "purity": "85%",
+        "quantity": "600 kg/month",
+        "technical_requirements": [
+            "Food Grade",
+            "Colorless"
+        ]
+    }
+]
