@@ -19,7 +19,14 @@ class LLMTool:
         """Process text using the LLM"""
         try:
             self.logger.info(f"Processing prompt: {prompt[:100]}...")
-            response = self.llm(prompt)
+            # Add JSON formatting instruction
+            formatted_prompt = f"""
+            {prompt}
+
+            IMPORTANT: Your response must be ONLY a valid JSON object/array.
+            Do not include any additional text, explanations, or markdown.
+            """
+            response = self.llm(formatted_prompt)
             parsed_response = self.parser.parse(response)
             self.logger.info("LLM processing completed successfully")
             return parsed_response

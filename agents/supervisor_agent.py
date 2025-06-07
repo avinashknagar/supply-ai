@@ -41,53 +41,66 @@ class SupervisorAgent:
         """
         Format the results into a human-readable format
         """
-        if results["status"] == "error":
-            return f"Error processing order: {results['error']}"
+        if results.get("status") == "error":
+            return f"Error processing order: {results.get('error')}"
 
         output = []
         output.append("=== Order Analysis Report ===")
         output.append("\nOrder Specifications:")
-        specs = results["order_specifications"]
+        specs = results.get("order_specifications", {})
         output.append(f"- Material: {specs.get('material', 'N/A')}")
         output.append(f"- Purity: {specs.get('purity', 'N/A')}")
         output.append(f"- Quantity: {specs.get('quantity', 'N/A')}")
         output.append(f"- Technical Requirements: {specs.get('technical_requirements', 'N/A')}")
 
         output.append("\nMatching Results:")
-        matches = results["matching_results"]
-        if not matches:
+        matches = results.get("matching_results", [])
+        if not matches or (isinstance(matches, list) and len(matches) == 1 and "message" in matches[0]):
             output.append("No matches found in inventory.")
         else:
             for idx, match in enumerate(matches[:3], 1):  # Show top 3 matches
-                output.append(f"\nMatch #{idx} (Score: {match['match_score']})")
-                item = match['inventory_item']
+                output.append(f"\nMatch #{idx} (Score: {match.get('match_score', 0)}%)")
+                item = match.get('inventory_item', {})
                 output.append(f"- Material: {item.get('material', 'N/A')}")
                 output.append(f"- Purity: {item.get('purity', 'N/A')}")
                 output.append(f"- Quantity: {item.get('quantity', 'N/A')}")
                 output.append(f"- Technical Requirements: {item.get('technical_requirements', 'N/A')}")
                 output.append("Comments:")
-                for comment in match['comments']:
+                for comment in match.get('comments', []):
                     output.append(f"  * {comment}")
 
-        output.append(f"\nProcessed at: {results['processed_at']}")
+        output.append(f"\nProcessed at: {results.get('processed_at', 'N/A')}")
         return "\n".join(output)
 
     def process_multiple_orders(self, orders_text: str, inventory_data: List[Dict[str, Any]]) -> List[str]:
         """
         Process multiple orders from a text file
         """
-        # Split the text into individual orders
-        orders = orders_text.strip().split("Order")
-        orders = [o.strip() for o in orders if o.strip()]
-        
-        all_results = []
-        for i, order in enumerate(orders, 1):
-            self.logger.info(f"Processing order #{i}")
-            results = self.process_order(order, inventory_data)
-            formatted_result = self.format_results(results)
-            all_results.append(formatted_result)
+        try:
+            # Get all orders at once as JSON array
+            orders = self.spec_agent.process_multiple_rfqs(orders_text)
             
-        return all_results
+            all_results = []
+            for i, order in enumerate(orders, 1):
+                self.logger.info(f"Processing order #{i}")
+                try:
+                    matches = self.matchmaker_agent.compare_inventory(inventory_data, order)
+                    result = {
+                        "order_specifications": order,
+                        "matching_results": matches,
+                        "processed_at": datetime.now().isoformat(),
+                        "status": "success"
+                    }
+                    formatted_result = self.format_results(result)
+                    all_results.append(formatted_result)
+                except Exception as e:
+                    self.logger.error(f"Error processing order #{i}: {str(e)}")
+                    all_results.append(f"Error processing order #{i}: {str(e)}")
+                
+            return all_results
+        except Exception as e:
+            self.logger.error(f"Error processing multiple orders: {str(e)}")
+            return [f"Error processing orders: {str(e)}"]
 
     def save_results(self, results: List[str], output_dir: str = "/home/avi/docs/supply-ai/output") -> str:
         """
