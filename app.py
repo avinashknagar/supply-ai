@@ -55,13 +55,13 @@ def cli_mode():
         output_file = supervisor.save_results(results)
         
         print(f"\nProcessing complete!")
-        print(f"Results have been saved to: {output_file}")
-        print("\nSummary of processed orders:")
+        print(f"Results have been saved in Markdown format to: {output_file}")
+        print("\nSummary of processed orders (Markdown preview):")
         for i, result in enumerate(results, 1):
-            print(f"\nOrder {i}:")
-            print("-" * 40)
+            print(f"\n{'='*60}")
             print(result)
-            
+            print(f"{'='*60}")
+        
     except Exception as e:
         logger.error(f"Error processing orders: {str(e)}")
         print(f"Error: {str(e)}")

@@ -1,0 +1,78 @@
+[
+  {
+    "order_id": 1,
+    "material": "Hydrochloric Acid",
+    "purity": 36.0,
+    "quantity": "100 kg/month",
+    "technical_requirements": [
+      "Industrial Grade"
+    ]
+  },
+  {
+    "order_id": 2,
+    "material": "Sulfuric Acid",
+    "purity": 99.0,
+    "quantity": "150 kg/month",
+    "technical_requirements": [
+      "Pharma Grade",
+      "Low Water Content",
+      "Extra Pure"
+    ]
+  },
+  {
+    "order_id": 3,
+    "material": "Acetic Acid",
+    "purity": 99.0,
+    "quantity": "50 kg/month",
+    "technical_requirements": [
+      "Glacial"
+    ]
+  },
+  {
+    "order_id": 4,
+    "material": "Caustic Soda Flakes",
+    "purity": 90.0,
+    "quantity": "600 kg/month",
+    "technical_requirements": [
+      "Food Grade",
+      "Low Iron",
+      "Kosher Certified"
+    ]
+  },
+  {
+    "order_id": 5,
+    "material": "Nitric Acid",
+    "purity": 65.0,
+    "quantity": "80 kg/month",
+    "technical_requirements": [
+      "None"
+    ]
+  },
+  {
+    "order_id": 6,
+    "material": "Caustic Soda Lye",
+    "purity": 45.0,
+    "quantity": "50 ton/month",
+    "technical_requirements": [
+      "Membrane Grade"
+    ]
+  },
+  {
+    "order_id": 7,
+    "material": "Sulfuric Acid",
+    "purity": 98.0,
+    "quantity": "150",
+    "technical_requirements": [
+      "Pharma Grade"
+    ]
+  },
+  {
+    "order_id": 8,
+    "material": "Hydrochloric Acid",
+    "purity": 30.0,
+    "quantity": "200 kg/week",
+    "technical_requirements": [
+      "Industrial Grade"
+    ]
+  }
+]

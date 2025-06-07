@@ -5,16 +5,74 @@ from .matchmaker_agent import MatchmakerAgent
 from datetime import datetime
 import os
 import pathlib
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.llms import Ollama
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from .tools.markdown_tool import MarkdownTool
+import json
 
 class SupervisorAgent:
     def __init__(self):
         self.spec_agent = SpecAgent()
         self.matchmaker_agent = MatchmakerAgent()
         self.logger = logging.getLogger(__name__)
+        
+        # Initialize LLM with fallback
+        try:
+            self.llm = ChatOpenAI(temperature=0.3)
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize OpenAI: {e}")
+            self.logger.info("Falling back to local Ollama model")
+            self.llm = Ollama(model="llama2", temperature=0.3)
+        
+        # Define the supervisor prompt
+        self.supervisor_prompt = PromptTemplate(
+            input_variables=["order_specs", "matches"],
+            template="""
+            As a Supply Chain Supervisor, analyze the following order specifications and matching results:
+            
+            Order Specifications:
+            {order_specs}
+            
+            Matching Results:
+            {matches}
+            
+            Provide a brief analysis including:
+            1. Whether the matches are satisfactory
+            2. Any potential risks or concerns
+            3. Recommendations for proceeding
+            
+            Keep the response concise and business-focused.
+            """
+        )
+        
+        # Create the analysis chain
+        self.analysis_chain = LLMChain(
+            llm=self.llm,
+            prompt=self.supervisor_prompt
+        )
+
+        # Initialize tools
+        self.tools = {
+            "markdown": MarkdownTool()
+        }
+
+    def analyze_matches(self, specs: Dict[str, Any], matches: List[Dict[str, Any]]) -> str:
+        """Analyze matches using LLM"""
+        try:
+            analysis = self.analysis_chain.run(
+                order_specs=str(specs),
+                matches=str(matches)
+            )
+            return analysis
+        except Exception as e:
+            self.logger.error(f"LLM analysis failed: {str(e)}")
+            return "Analysis unavailable due to error"
 
     def process_order(self, order_text: str, inventory_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Process a single order text through the entire pipeline
+        Process a single order text through the entire pipeline with AI analysis
         """
         try:
             # Extract specifications using SpecAgent
@@ -23,9 +81,13 @@ class SupervisorAgent:
             # Find matches using MatchmakerAgent
             matches = self.matchmaker_agent.compare_inventory(inventory_data, specs)
             
+            # Get AI analysis
+            ai_analysis = self.analyze_matches(specs, matches)
+            
             return {
                 "order_specifications": specs,
                 "matching_results": matches,
+                "ai_analysis": ai_analysis,
                 "processed_at": datetime.now().isoformat(),
                 "status": "success"
             }
@@ -38,49 +100,21 @@ class SupervisorAgent:
             }
 
     def format_results(self, results: Dict[str, Any]) -> str:
-        """
-        Format the results into a human-readable format
-        """
-        if results.get("status") == "error":
-            return f"Error processing order: {results.get('error')}"
+        """Format the results using the markdown tool"""
+        return self.tools["markdown"].run(results)
 
-        output = []
-        output.append("=== Order Analysis Report ===")
-        output.append("\nOrder Specifications:")
-        specs = results.get("order_specifications", {})
-        output.append(f"- Material: {specs.get('material', 'N/A')}")
-        output.append(f"- Purity: {specs.get('purity', 'N/A')}")
-        output.append(f"- Quantity: {specs.get('quantity', 'N/A')}")
-        output.append(f"- Technical Requirements: {specs.get('technical_requirements', 'N/A')}")
-
-        output.append("\nMatching Results:")
-        matches = results.get("matching_results", [])
-        if not matches or (isinstance(matches, list) and len(matches) == 1 and "message" in matches[0]):
-            output.append("No matches found in inventory.")
-        else:
-            for idx, match in enumerate(matches[:3], 1):  # Show top 3 matches
-                output.append(f"\nMatch #{idx} (Score: {match.get('match_score', 0)}%)")
-                item = match.get('inventory_item', {})
-                output.append(f"- Material: {item.get('material', 'N/A')}")
-                output.append(f"- Purity: {item.get('purity', 'N/A')}")
-                output.append(f"- Quantity: {item.get('quantity', 'N/A')}")
-                output.append(f"- Technical Requirements: {item.get('technical_requirements', 'N/A')}")
-                output.append("Comments:")
-                for comment in match.get('comments', []):
-                    output.append(f"  * {comment}")
-
-        output.append(f"\nProcessed at: {results.get('processed_at', 'N/A')}")
-        return "\n".join(output)
-
-    def process_multiple_orders(self, orders_text: str, inventory_data: List[Dict[str, Any]]) -> List[str]:
+    def process_multiple_orders(self, orders_text: str, inventory_data: List[Dict[str, Any]]) -> Dict[str, List]:
         """
         Process multiple orders from a text file
+        Returns both raw and formatted results
         """
         try:
             # Get all orders at once as JSON array
             orders = self.spec_agent.process_multiple_rfqs(orders_text)
             
-            all_results = []
+            raw_results = []
+            formatted_results = []
+            
             for i, order in enumerate(orders, 1):
                 self.logger.info(f"Processing order #{i}")
                 try:
@@ -91,34 +125,50 @@ class SupervisorAgent:
                         "processed_at": datetime.now().isoformat(),
                         "status": "success"
                     }
-                    formatted_result = self.format_results(result)
-                    all_results.append(formatted_result)
+                    raw_results.append(result)
+                    formatted_results.append(self.format_results(result))
                 except Exception as e:
                     self.logger.error(f"Error processing order #{i}: {str(e)}")
-                    all_results.append(f"Error processing order #{i}: {str(e)}")
+                    formatted_results.append(f"Error processing order #{i}: {str(e)}")
                 
-            return all_results
+            return {
+                "raw": raw_results,
+                "formatted": formatted_results
+            }
         except Exception as e:
             self.logger.error(f"Error processing multiple orders: {str(e)}")
-            return [f"Error processing orders: {str(e)}"]
+            return {
+                "raw": [],
+                "formatted": [f"Error processing orders: {str(e)}"]
+            }
 
-    def save_results(self, results: List[str], output_dir: str = "/home/avi/docs/supply-ai/output") -> str:
-        """
-        Save results to a file in the output directory
-        """
-        # Ensure output directory exists
+    def save_results(self, results: Dict[str, List], output_dir: str = "/home/avi/docs/supply-ai/output") -> Dict[str, str]:
+        """Save results to markdown and JSON files"""
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
         
-        # Create filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = os.path.join(output_dir, f"order_analysis_{timestamp}.txt")
+        md_file = os.path.join(output_dir, f"{timestamp}_order_analysis.md")
+        json_file = os.path.join(output_dir, f"{timestamp}_order_specs.json")
         
-        # Write results to file
-        with open(output_file, "w") as f:
-            f.write("\n\n" + "="*50 + "\n\n".join(results) + "\n" + "="*50)
+        # Write markdown results
+        with open(md_file, "w") as f:
+            for i, result in enumerate(results["formatted"], 1):
+                if i > 1:
+                    f.write("\n\n---\n\n")
+                f.write(result)
+
+        # Save raw specifications
+        if results["raw"]:
+            specs = [r["order_specifications"] for r in results["raw"]]
+            with open(json_file, "w") as f:
+                json.dump(specs, f, indent=2)
+            self.logger.info(f"Specifications saved to: {json_file}")
+        else:
+            json_file = None
+            self.logger.warning("No raw specifications to save")
         
-        self.logger.info(f"Results saved to: {output_file}")
-        return output_file
+        self.logger.info(f"Results saved to: {md_file}")
+        return {"markdown": md_file, "json": json_file}
 
 
 # Example usage
@@ -147,8 +197,10 @@ if __name__ == "__main__":
     # Process all orders
     results = supervisor.process_multiple_orders(orders_text, sample_inventory)
     
-    # Save results to file
-    output_file = supervisor.save_results(results)
+    # Save results to files
+    output_files = supervisor.save_results(results)
     
     # Print results location
-    print(f"\nResults have been saved to: {output_file}")
+    print(f"\nResults have been saved to: {output_files['markdown']}")
+    if output_files['json']:
+        print(f"Specifications saved to: {output_files['json']}")
